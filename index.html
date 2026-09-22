@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-palette="#2a78d6,#eb6834,#1baf7a,#eda100">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diagnóstico de Nível de IA</title>
+<meta name="description" content="Descubra o seu nível de maturidade em Inteligência Artificial em até 5 minutos e receba um plano de evolução.">
+<meta name="theme-color" content="#0f1024">
+<meta property="og:title" content="Diagnóstico de Nível de IA">
+<meta property="og:description" content="Em 5 minutos, descubra o seu quadrante de maturidade em IA e receba um roadmap de evolução.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%236d5efc'/%3E%3Cpath d='M9 22V10m14 12V10M9 16h14' stroke='white' stroke-width='2.6' stroke-linecap='round'/%3E%3Ccircle cx='23' cy='10' r='3.4' fill='%23ff5c8a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Pular para o conteúdo</a>
+
+<div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="30" height="30"><rect width="32" height="32" rx="9" fill="url(#bg)"/><path d="M9 22V10m14 12V10M9 16h14" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="23" cy="10" r="3.6" fill="#ff5c8a"/><defs><linearGradient id="bg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#6d5efc"/><stop offset="1" stop-color="#20c5e8"/></linearGradient></defs></svg>
+    </span>
+    <span class="brand-text">
+      <strong>Gaditas Consultoria</strong>
+      <small>Diagnóstico de Nível de IA</small>
+    </span>
+  </div>
+  <div class="topbar-actions">
+    <button id="btn-restart-top" class="ghost-btn is-hidden" type="button">Recomeçar</button>
+    <button id="btn-theme" class="icon-btn" type="button" aria-label="Alternar tema claro e escuro" title="Alternar tema (T)">
+      <svg class="ico-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2M12 19.4v2M2.6 12h2M19.4 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4"/></svg>
+      <svg class="ico-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.2 8.2 0 0 1 9.5 4 8.3 8.3 0 1 0 20 14.5Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============================ BOAS-VINDAS ============================ -->
+  <section class="screen is-active" id="screen-welcome" aria-labelledby="welcome-title">
+    <div class="card card-hero">
+      <span class="eyebrow">Antes de começar</span>
+      <h1 id="welcome-title">Qual é o seu nível de <span class="grad">Inteligência Artificial</span> hoje?</h1>
+      <p class="lead">Um diagnóstico rápido, sem pegadinha e sem resposta certa. No final você recebe o seu quadrante, os seus pontos fortes e um plano de evolução em três prazos.</p>
+
+      <form id="form-name" novalidate>
+        <label class="field">
+          <span class="field-label">Como podemos te chamar?</span>
+          <input id="input-name" type="text" autocomplete="given-name" maxlength="40" placeholder="Digite o seu nome" required spellcheck="false">
+        </label>
+        <p class="field-error" id="name-error" hidden>Digite o seu nome para continuar.</p>
+        <button class="primary-btn" type="submit">Começar <kbd>Enter</kbd></button>
+      </form>
+
+      <ul class="hero-facts">
+        <li><b>40</b> perguntas no banco</li>
+        <li><b>4</b> dimensões avaliadas</li>
+        <li><b>3-5</b> minutos</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================== MODO ================================ -->
+  <section class="screen" id="screen-mode" aria-labelledby="mode-title" hidden>
+    <div class="card">
+      <span class="eyebrow" id="mode-greeting">Prazer!</span>
+      <h2 id="mode-title">Como você quer fazer o diagnóstico?</h2>
+      <p class="lead">As perguntas são sorteadas do banco a cada rodada, sempre com o mesmo número de perguntas por dimensão. Duas pessoas nunca respondem exatamente o mesmo teste.</p>
+
+      <div class="mode-grid" role="radiogroup" aria-labelledby="mode-title">
+        <button class="mode-card" type="button" role="radio" aria-checked="false" data-mode="20">
+          <span class="mode-key">1</span>
+          <span class="mode-badge">Recomendado</span>
+          <h3>Diagnóstico robusto</h3>
+          <p class="mode-meta">20 perguntas · ~5 minutos</p>
+          <p class="mode-desc">5 perguntas de cada dimensão. Resultado mais preciso e roadmap detalhado.</p>
+        </button>
+        <button class="mode-card" type="button" role="radio" aria-checked="false" data-mode="10">
+          <span class="mode-key">2</span>
+          <h3>Diagnóstico rápido</h3>
+          <p class="mode-meta">10 perguntas · ~3 minutos</p>
+          <p class="mode-desc">Uma leitura enxuta do seu quadrante, para quando o tempo é curto.</p>
+        </button>
+      </div>
+      <p class="hint">Use <kbd>1</kbd> <kbd>2</kbd> ou as setas e <kbd>Enter</kbd>.</p>
+    </div>
+  </section>
+
+  <!-- ============================== QUIZ ================================ -->
+  <section class="screen" id="screen-quiz" aria-labelledby="question-text" hidden>
+    <div class="card card-quiz">
+      <div class="progress-head">
+        <span id="progress-label">Pergunta 1 de 20</span>
+        <span id="progress-pct">5%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div></div>
+      <div class="progress-dots" id="progress-dots" aria-hidden="true"></div>
+
+      <p class="q-dim" id="question-dim">Conhecimento</p>
+      <h2 class="q-text" id="question-text"></h2>
+      <p class="q-scale">1 = Discordo totalmente <span>|</span> 5 = Concordo totalmente</p>
+
+      <div class="scale" id="scale" role="radiogroup" aria-labelledby="question-text"></div>
+
+      <div class="quiz-nav">
+        <button class="ghost-btn" id="btn-back" type="button">← Voltar</button>
+        <button class="primary-btn" id="btn-next" type="button" disabled>Avançar →</button>
+      </div>
+      <p class="hint center">Não existe certo ou errado, apenas a sua percepção atual. Teclas <kbd>1</kbd>–<kbd>5</kbd> respondem.</p>
+    </div>
+  </section>
+
+  <!-- ============================= REVISÃO ============================== -->
+  <section class="screen" id="screen-review" aria-labelledby="review-title" hidden>
+    <div class="card">
+      <span class="eyebrow">Quase lá</span>
+      <h2 id="review-title">Revisão das suas respostas</h2>
+      <p class="lead">Clique em qualquer nota para ajustar antes de finalizar.</p>
+      <ol class="review-list" id="review-list"></ol>
+      <div class="quiz-nav">
+        <button class="ghost-btn" id="btn-review-back" type="button">← Voltar às perguntas</button>
+        <button class="primary-btn" id="btn-finish" type="button">Finalizar diagnóstico <kbd>Enter</kbd></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ RESULTADO ============================= -->
+  <section class="screen" id="screen-result" aria-labelledby="result-title" hidden>
+
+    <div class="card result-hero">
+      <div class="result-hero-text">
+        <span class="eyebrow" id="result-name">Resultado</span>
+        <h2 id="result-title">Construtor Avançado</h2>
+        <p class="result-tagline" id="result-tagline"></p>
+        <p class="result-summary" id="result-summary"></p>
+        <div class="result-actions">
+          <button class="primary-btn" id="btn-pdf" type="button">Baixar PDF</button>
+          <button class="ghost-btn" id="btn-copy" type="button">Copiar resumo</button>
+          <button class="ghost-btn" id="btn-restart" type="button">Refazer</button>
+        </div>
+      </div>
+      <div class="result-hero-score">
+        <div class="score-ring" id="score-ring">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <defs>
+              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#6d5efc"></stop>
+                <stop offset="0.55" stop-color="#8b5cf6"></stop>
+                <stop offset="1" stop-color="#20c5e8"></stop>
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+            <circle class="ring-fg" cx="60" cy="60" r="52" id="ring-fg"></circle>
+          </svg>
+          <div class="score-ring-inner">
+            <strong id="score-value">0.0</strong>
+            <span>de 5</span>
+          </div>
+        </div>
+        <p class="score-band" id="score-band">Nível</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="chart-title">Seu lugar no mapa</h3>
+      <p class="chart-sub" id="quadrant-caption">Eixo horizontal: o quanto você sabe. Eixo vertical: usar ou criar.</p>
+      <div class="chart-wrap" id="quadrant-wrap"></div>
+    </div>
+
+    <div class="card">
+      <h3 class="chart-title">As quatro dimensões</h3>
+      <p class="chart-sub">Média das suas respostas em cada dimensão, de 1 a 5.</p>
+      <div class="dual-chart">
+        <div class="chart-wrap" id="radar-wrap"></div>
+        <div class="bars" id="dim-bars"></div>
+      </div>
+      <button class="link-btn" id="btn-table" type="button" aria-expanded="false">Ver como tabela</button>
+      <div class="table-wrap" id="table-wrap" hidden></div>
+    </div>
+
+    <div class="card-row">
+      <div class="card">
+        <h3 class="chart-title">Seus destaques</h3>
+        <ul class="tick-list" id="list-highlights"></ul>
+      </div>
+      <div class="card">
+        <h3 class="chart-title">Pontos de atenção</h3>
+        <ul class="tick-list warn" id="list-gaps"></ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="chart-title">Roadmap de evolução</h3>
+      <ol class="roadmap" id="roadmap"></ol>
+    </div>
+
+    <div class="card card-next">
+      <h3 class="chart-title">Próximos passos</h3>
+      <ul class="next-list" id="next-steps"></ul>
+      <p class="hint">Escolha um. Um só, e faça esta semana.</p>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <span>Gaditas Consultoria · Diagnóstico de Nível de IA</span>
+  <span class="dot">·</span>
+  <span id="footer-version">v1.0</span>
+</footer>
+
+<div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="false"></div>
+
+<!-- jsPDF 2.5.2 (MIT) servido localmente: o PDF funciona sem depender de CDN -->
+<script src="assets/vendor/jspdf.umd.min.js" defer></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/report.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
