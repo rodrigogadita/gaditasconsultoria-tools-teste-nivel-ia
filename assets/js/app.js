@@ -453,6 +453,18 @@ function copyImageToClipboard(job) {
   }
 }
 
+/* Adianta o download do pdf.js quando o ponteiro chega no botão: quem nunca
+   pede imagem continua sem baixar nada. */
+function armReportPrefetch() {
+  const warm = () => { try { loadPdfjs(); } catch (err) { /* segue sem adiantar */ } };
+  ['#btn-whats', '#btn-png'].forEach(sel => {
+    const btn = $(sel);
+    if (!btn) return;
+    ['pointerenter', 'touchstart', 'focus'].forEach(evt =>
+      btn.addEventListener(evt, warm, { once: true, passive: true }));
+  });
+}
+
 let pendingShare = null;      /* imagem pronta esperando um novo toque */
 
 async function shareOnWhatsApp(btn) {
@@ -594,7 +606,7 @@ function bind() {
 
     const label = btn.innerHTML;
     btn.disabled = true;
-    btn.textContent = 'Preparando...';
+    btn.textContent = 'Gerando imagem...';
     try {
       await shareOnWhatsApp(btn);
     } catch (err) {
@@ -606,6 +618,7 @@ function bind() {
     }
   });
 
+  armReportPrefetch();
   $('#btn-theme').addEventListener('click', toggleTheme);
   document.addEventListener('keydown', onKey);
 }
