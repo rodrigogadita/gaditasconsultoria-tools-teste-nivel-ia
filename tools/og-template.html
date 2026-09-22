@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { width: 1200px; height: 630px; overflow: hidden; font-family: Inter, sans-serif;
+         background: #0f1024; color: #fff; position: relative; }
+  .glow { position: absolute; border-radius: 50%; filter: blur(110px); }
+  .g1 { width: 620px; height: 620px; background: #6d5efc; opacity: .55; left: -140px; top: -180px; }
+  .g2 { width: 520px; height: 520px; background: #20c5e8; opacity: .4; right: -120px; bottom: -200px; }
+  .g3 { width: 420px; height: 420px; background: #ff5c8a; opacity: .28; right: 280px; top: -160px; }
+  .wrap { position: relative; padding: 68px 72px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+  .top { display: flex; align-items: center; gap: 18px; }
+  .tile { width: 86px; height: 86px; border-radius: 22px; display: grid; place-items: center;
+          background: linear-gradient(135deg, #22348e, #6d5efc); }
+  .tile svg { width: 50px; fill: #fff; }
+  .brand b { font-family: Sora; font-size: 24px; letter-spacing: -.01em; display: block; }
+  .brand span { font-size: 16px; color: #a9a7d4; }
+  h1 { font-family: Sora; font-size: 66px; line-height: 1.06; letter-spacing: -.03em; max-width: 720px; }
+  h1 em { font-style: normal; background: linear-gradient(100deg, #8b7dff, #20c5e8);
+          -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .foot { display: flex; align-items: center; gap: 26px; font-size: 20px; color: #c9c7ea; }
+  .pill { padding: 12px 24px; border-radius: 999px; background: rgba(255,255,255,.09);
+          border: 1px solid rgba(255,255,255,.16); font-weight: 600; font-size: 19px; }
+  .quad { position: absolute; right: 72px; bottom: 132px; width: 248px; height: 248px;
+          border-radius: 26px; border: 1px solid rgba(255,255,255,.16); opacity: .92; }
+  .quad i { position: absolute; background: rgba(255,255,255,.07); border-radius: 14px; }
+  .quad .c1 { left: 10px; top: 10px; width: 106px; height: 106px; }
+  .quad .c2 { right: 10px; top: 10px; width: 106px; height: 106px; background: rgba(139,125,255,.3); border: 1px solid #8b7dff; }
+  .quad .c3 { left: 10px; bottom: 10px; width: 106px; height: 106px; }
+  .quad .c4 { right: 10px; bottom: 10px; width: 106px; height: 106px; }
+  .quad .dot { position: absolute; right: 52px; top: 52px; width: 26px; height: 26px; border-radius: 50%;
+               background: linear-gradient(135deg, #6d5efc, #ff5c8a); box-shadow: 0 0 0 6px rgba(109,94,252,.28); }
+</style></head>
+<body>
+  <div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div>
+  <div class="wrap">
+    <div class="top">
+      <div class="tile"><img src="../assets/img/gaditas-emblem.svg" alt="" style="width:56px;filter:brightness(0) invert(1)"></div>
+      <div class="brand"><b>Gaditas Consultoria</b><span>Diagnóstico de maturidade</span></div>
+    </div>
+    <h1>Qual é o seu nível de <em>Inteligência Artificial</em> hoje?</h1>
+    <div class="foot">
+      <span class="pill">20 perguntas · 5 minutos</span>
+      <span>Resultado, quadrante e plano de evolução em PDF</span>
+    </div>
+    <div class="quad"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><span class="dot"></span></div>
+  </div>
+</body></html>

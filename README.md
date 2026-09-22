@@ -17,7 +17,13 @@ posiciona o resultado num mapa de quadrantes e entrega um roadmap de evolução 
 
 São **40 perguntas**, 10 em cada uma das quatro dimensões. O sorteio é **balanceado**:
 no modo robusto entram 5 de cada dimensão; no rápido, 2 ou 3 de cada. A ordem é
-intercalada, então duas pessoas nunca respondem exatamente o mesmo teste.
+intercalada por dimensão e o embaralhamento é um Fisher-Yates alimentado por
+`crypto.getRandomValues` (sem viés de módulo), então cada pessoa recebe um teste
+diferente.
+
+Medido em 5.000 rodadas simuladas: 5.000 ordens distintas, as 40 perguntas com
+frequência entre 2.394 e 2.548 (esperado 2.500), as 40 aparecendo como primeira
+pergunta e exatamente 25% das perguntas em cada dimensão.
 
 | Dimensão | O que mede | Eixo |
 |---|---|---|
@@ -41,13 +47,19 @@ O corte fica em 3,0 nos dois eixos, gerando os quadrantes:
 ## Estrutura
 
 ```
-index.html                    telas e marcação
-assets/css/styles.css         tokens, tema claro/escuro, layout
-assets/js/data.js             40 perguntas, dimensões, perfis, mensagens
-assets/js/charts.js           mapa de quadrantes e radar em SVG puro
-assets/js/report.js           geração do PDF (vetorial, texto selecionável)
-assets/js/app.js              máquina de telas, atalhos, pontuação
-assets/vendor/jspdf.umd.min.js  jsPDF 2.5.2 (MIT), servido localmente
+index.html                     telas, marcação e o traçado da logo (usado por <use>)
+assets/css/styles.css          tokens, tema claro/escuro, layout
+assets/js/data.js              40 perguntas, dimensões, perfis, mensagens
+assets/js/charts.js            mapa de quadrantes e radar em SVG puro
+assets/js/logo.js              rasteriza a logo para o PDF, na cor pedida
+assets/js/report.js            relatório em PDF (vetorial, texto selecionável)
+assets/js/app.js               máquina de telas, atalhos, pontuação
+assets/img/gaditas-logo.svg    logo completa vetorizada (fill: currentColor)
+assets/img/gaditas-emblem.svg  só o emblema (mesmo traçado, outro viewBox)
+assets/img/favicon.svg         emblema branco sobre o azul da marca
+assets/img/og.png              imagem de compartilhamento (1200x630)
+assets/vendor/jspdf.umd.min.js jsPDF 2.5.2 (MIT), servido localmente
+tools/og-template.html         página usada para regerar a og.png
 ```
 
 Sem build, sem framework e sem dependência de CDN — é só abrir o `index.html`.
@@ -62,6 +74,14 @@ Sem build, sem framework e sem dependência de CDN — é só abrir o `index.htm
 | `←` / `Backspace` | voltar uma pergunta |
 | `→` | avançar |
 | `T` | alternar tema claro/escuro |
+
+## Marca
+
+A logo veio de um PNG e foi vetorizada (potrace + svgo) para um único `path`, declarado
+uma vez no `index.html` e reaproveitado por `<use>` em tamanhos diferentes. Como o
+preenchimento é `currentColor`, ela acompanha o tema: azul da marca no claro, branca no
+escuro e branca sobre a faixa em degradê no PDF — onde é rasterizada na hora pelo
+`logo.js`, porque o jsPDF não lê SVG.
 
 ## Detalhes técnicos
 

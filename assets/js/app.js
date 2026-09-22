@@ -13,15 +13,34 @@ const state = {
   answers: {},           /* id -> 1..5 */
   index: 0,
   result: null,
+  startedAt: 0,
   nudgeCount: 0,
   usedNudges: new Set()
 };
 
 /* ------------------------------- utilidades ------------------------------- */
+
+/* Inteiro aleatório em [0, max) sem viés: usa crypto quando existe e descarta
+   os valores que cairiam na sobra da divisão. Garante ordens diferentes a
+   cada rodada, para cada pessoa. */
+function randomInt(max) {
+  if (max <= 1) return 0;
+  const crypto = window.crypto || window.msCrypto;
+  if (crypto && crypto.getRandomValues) {
+    const limit = Math.floor(0x100000000 / max) * max;
+    const buf = new Uint32Array(1);
+    let value;
+    do { crypto.getRandomValues(buf); value = buf[0]; } while (value >= limit);
+    return value % max;
+  }
+  return Math.floor(Math.random() * max);
+}
+
+/* Fisher-Yates */
 const shuffle = arr => {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = randomInt(i + 1);
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
@@ -63,7 +82,7 @@ function save() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       stage: state.stage, name: state.name, mode: state.mode,
       questionIds: state.questions.map(q => q.id),
-      answers: state.answers, index: state.index
+      answers: state.answers, index: state.index, startedAt: state.startedAt
     }));
   } catch (e) { /* modo privado: segue sem salvar */ }
 }
@@ -85,7 +104,8 @@ function restore() {
     Object.assign(state, {
       name: data.name || '', mode: data.mode || questions.length,
       questions, answers: data.answers || {},
-      index: Math.min(data.index || 0, questions.length - 1)
+      index: Math.min(data.index || 0, questions.length - 1),
+      startedAt: data.startedAt || Date.now()
     });
     go(data.stage);
     toast('Retomamos de onde você parou.');
@@ -269,11 +289,14 @@ function computeResult() {
   const gaps = scored.filter(i => i.v <= 3)
     .sort((a, b) => a.v - b.v).slice(0, 4).map(i => `${i.q.emoji} ${i.q.text}`);
 
+  const elapsed = state.startedAt ? Math.round((Date.now() - state.startedAt) / 60000) : 0;
+
   return {
     name: firstName(state.name), fullName: state.name.trim(),
     dimScores, x, y, quadrant, overall,
     band: band.name, profile: PROFILES[quadrant],
     highlights, gaps, mode: state.questions.length,
+    minutes: elapsed > 0 ? `${elapsed} min` : 'menos de 1 min',
     date: new Date()
   };
 }
@@ -282,7 +305,8 @@ function renderResult() {
   const r = computeResult();
   state.result = r;
 
-  $('#result-name').textContent = `${r.name} · quadrante ${r.quadrant} · ${r.mode} perguntas`;
+  $('#result-name').textContent =
+    `${r.name} · quadrante ${r.quadrant} · ${r.mode} perguntas · ${r.minutes}`;
   $('#result-title').textContent = r.profile.title;
   $('#result-tagline').textContent = r.profile.tagline;
   $('#result-summary').textContent = r.profile.summary;
@@ -407,14 +431,38 @@ function bind() {
     }
   });
 
-  $('#btn-pdf').addEventListener('click', () => {
+  $('#btn-pdf').addEventListener('click', async e => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    btn.textContent = 'Gerando...';
     try {
-      buildPdf(state.result);
+      await buildPdf(state.result);
       toast('PDF gerado.');
     } catch (err) {
       console.error(err);
       toast('Não consegui gerar o PDF. Abrindo a impressão do navegador.');
       window.print();
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Baixar PDF';
+    }
+  });
+
+  $('#btn-share').addEventListener('click', async () => {
+    const url = location.href.split('#')[0];
+    const data = {
+      title: 'Diagnóstico de Nível de IA',
+      text: 'Descobri o meu nível de IA em 5 minutos. Faz o seu:',
+      url
+    };
+    try {
+      if (navigator.share) await navigator.share(data);
+      else {
+        await navigator.clipboard.writeText(`${data.text} ${url}`);
+        toast('Link copiado. É só colar onde quiser.');
+      }
+    } catch (err) {
+      if (err && err.name !== 'AbortError') toast('Não consegui compartilhar por aqui.');
     }
   });
 
@@ -427,6 +475,7 @@ function startQuiz(mode) {
   state.questions = sampleQuestions(mode);
   state.answers = {};
   state.index = 0;
+  state.startedAt = Date.now();
   state.nudgeCount = 0;
   state.usedNudges.clear();
   document.querySelectorAll('.mode-card').forEach(c => {
