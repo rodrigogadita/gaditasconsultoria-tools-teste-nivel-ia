@@ -155,16 +155,16 @@ async function buildPdf(result) {
   };
 
   /* ------------------------------- cabeçalho ------------------------------ */
-  gradientRect(0, 0, PAGE_W, 46, [C.navy, C.brandInk, C.brand, C.cyan]);
+  gradientRect(0, 0, PAGE_W, 42, [C.navy, C.brandInk, C.brand, C.cyan]);
   /* leve realce inferior, como o card do site */
   fill(C.white);
-  doc.rect(0, 45.4, PAGE_W, 0.6, 'F');
+  doc.rect(0, 41.4, PAGE_W, 0.6, 'F');
 
   let textX = M;
   try {
     const logo = await renderLogo('#ffffff', 560);
-    const h = 26, w = h * (logo.width / logo.height);
-    doc.addImage(logo.dataUrl, 'PNG', M, 10, w, h, 'logo', 'FAST');
+    const h = 24, w = h * (logo.width / logo.height);
+    doc.addImage(logo.dataUrl, 'PNG', M, 9, w, h, 'logo', 'FAST');
     textX = M + w + 8;
   } catch (err) {
     console.warn('logo indisponível no PDF:', err);
@@ -172,16 +172,16 @@ async function buildPdf(result) {
 
   ink(C.white);
   font('bold', 17);
-  doc.text('Diagnóstico de Nível de IA', textX, 22);
+  doc.text('Diagnóstico de Nível de IA', textX, 20);
   font('normal', 9);
   doc.setTextColor(226, 224, 255);
   const quando = result.date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-  doc.text(`Relatório individual · ${quando}`, textX, 29);
+  doc.text(`Relatório individual · ${quando}`, textX, 26.5);
   const tempo = result.minutes && /^\d+ min$/.test(result.minutes) ? ` · ${result.minutes}` : '';
-  doc.text(`${result.mode} perguntas${tempo}`, textX, 35);
+  doc.text(`${result.mode} perguntas${tempo}`, textX, 32.5);
 
   /* --------------------------------- nome -------------------------------- */
-  y = 60;
+  y = 55;
   font('bold', 8);
   ink(C.brandInk);
   doc.text('DIAGNÓSTICO DE', M, y);
@@ -192,28 +192,28 @@ async function buildPdf(result) {
   y += 7;
 
   /* ------------------------------ card do perfil -------------------------- */
-  const cardH = 40;
+  const cardH = 36;
   card(M, y, CW, cardH, { bg: C.soft, accent: C.brand });
   const cx = PAGE_W - M - 22;
-  ring(cx, y + 18, 11, Math.max(result.overall / 5, 0.02));
+  ring(cx, y + 16, 10.5, Math.max(result.overall / 5, 0.02));
   font('bold', 14);
   ink(C.brandInk);
-  doc.text(result.overall.toFixed(1), cx, y + 19, { align: 'center' });
+  doc.text(result.overall.toFixed(1), cx, y + 17, { align: 'center' });
   font('normal', 6.5);
   ink(C.muted);
-  doc.text('de 5', cx, y + 23.5, { align: 'center' });
+  doc.text('de 5', cx, y + 21.3, { align: 'center' });
   font('bold', 7.5);
   ink(C.brandInk);
-  doc.text(result.band, cx, y + 35, { align: 'center' });
+  doc.text(result.band, cx, y + 31.5, { align: 'center' });
 
-  chip(M + 7, y + 7, `QUADRANTE ${result.quadrant}`, C.brand, C.white);
+  chip(M + 7, y + 6, `QUADRANTE ${result.quadrant}`, C.brand, C.white);
   font('bold', 15);
   ink(C.ink);
-  doc.text(result.profile.title, M + 7, y + 21);
+  doc.text(result.profile.title, M + 7, y + 19.5);
   font('italic', 9.5);
   ink(C.body);
   doc.splitTextToSize(result.profile.tagline, CW - 58).forEach((line, i) => {
-    doc.text(line, M + 7, y + 28 + i * 4.6);
+    doc.text(line, M + 7, y + 26 + i * 4.6);
   });
   y += cardH + 9;
 
@@ -223,7 +223,7 @@ async function buildPdf(result) {
   /* -------------------- mapa de quadrantes + dimensões -------------------- */
   heading('Como você se posiciona');
 
-  const mapW = 82, mapH = 70, mapX = M, mapY = y + 4;
+  const mapW = 82, mapH = 62, mapX = M, mapY = y + 3;
   const mid = { x: mapX + mapW / 2, y: mapY + mapH / 2 };
 
   const zonas = [
@@ -292,10 +292,10 @@ async function buildPdf(result) {
     doc.splitTextToSize(dim.desc, barW).forEach((line, n) => {
       doc.text(line, barX, barY + 9 + n * 3.2);
     });
-    barY += 18;
+    barY += 16;
   });
 
-  y = mapY + mapH + 18;
+  y = mapY + mapH + 17;
 
   /* ------------------------------- destaques ------------------------------ */
   if (result.highlights.length) {
