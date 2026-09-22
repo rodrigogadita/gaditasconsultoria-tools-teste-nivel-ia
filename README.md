@@ -27,7 +27,11 @@ O botão do WhatsApp segue o aparelho:
 | Onde | O que acontece |
 |---|---|
 | Celular (Web Share com arquivo) | abre a folha de compartilhamento com a imagem anexada e o texto pronto — é só escolher o WhatsApp |
-| Desktop / navegador sem Web Share | abre o WhatsApp Web com o texto e baixa a imagem para anexar |
+| Desktop | copia a imagem para a área de transferência, abre o WhatsApp Web com o texto e baixa o arquivo; na conversa é só colar |
+
+Nenhuma API entrega arquivo direto ao WhatsApp Web, então a cópia é registrada com
+`ClipboardItem` recebendo uma promessa — assim ela é iniciada ainda dentro do clique e se
+completa quando a imagem fica pronta, mesmo com o foco já na aba do WhatsApp.
 
 O pdf.js (1,8 MB) só é baixado quando alguém pede imagem ou compartilhamento — a página
 inicial não carrega nada disso.

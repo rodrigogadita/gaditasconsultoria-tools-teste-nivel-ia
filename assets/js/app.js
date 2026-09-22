@@ -439,6 +439,20 @@ function useShareSheet() {
   return canShareFiles() && touch;
 }
 
+/* O ClipboardItem aceita uma promessa: a cópia é registrada ainda no clique e
+   só se completa quando a imagem fica pronta, sem depender do foco depois. */
+function copyImageToClipboard(job) {
+  try {
+    if (!navigator.clipboard || !navigator.clipboard.write || !window.ClipboardItem) {
+      return Promise.resolve(false);
+    }
+    const item = new ClipboardItem({ 'image/png': job.then(r => r.blob) });
+    return navigator.clipboard.write([item]).then(() => true, () => false);
+  } catch (err) {
+    return Promise.resolve(false);
+  }
+}
+
 let pendingShare = null;      /* imagem pronta esperando um novo toque */
 
 async function shareOnWhatsApp(btn) {
@@ -446,18 +460,31 @@ async function shareOnWhatsApp(btn) {
   const text = shareMessage(r);
   const waUrl = 'https://wa.me/?text=' + encodeURIComponent(text);
 
-  /* Desktop ou navegador sem Web Share: abre o WhatsApp agora, enquanto o
-     clique ainda vale, e baixa a imagem para anexar. */
+  /* Desktop: nenhuma API entrega arquivo para o WhatsApp Web, então a imagem
+     vai para a área de transferência (cola com Ctrl+V na conversa) e também é
+     baixada. As duas chamadas precisam sair enquanto o clique ainda vale. */
   if (!useShareSheet()) {
+    const job = reportImage(r);
+    const copying = copyImageToClipboard(job);
     window.open(waUrl, '_blank', 'noopener');
+
+    let image = null;
     try {
-      const { blob, name } = await reportImage(r);
-      downloadBlob(blob, name);
-      toast('Imagem baixada. É só anexar na conversa — o texto já foi junto.', 5600);
+      image = await job;
     } catch (err) {
       console.error(err);
-      toast('O WhatsApp abriu com o texto, mas a imagem não saiu. Tente o PDF.', 5200);
     }
+    const copied = await copying;
+
+    if (!image) {
+      toast('O WhatsApp abriu com o texto, mas a imagem não saiu. Tente o PDF.', 5200);
+      return;
+    }
+    downloadBlob(image.blob, image.name);
+    const paste = /Mac|iPhone|iPad/i.test(navigator.userAgent) ? 'Cmd+V' : 'Ctrl+V';
+    toast(copied
+      ? `Imagem copiada — cole com ${paste} na conversa. Ela também foi baixada.`
+      : 'Imagem baixada — arraste o arquivo para a conversa do WhatsApp.', 6500);
     return;
   }
 
