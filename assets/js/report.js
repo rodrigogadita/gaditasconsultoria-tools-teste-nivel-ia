@@ -22,12 +22,21 @@ const C = {
 
 const PAGE_W = 210, PAGE_H = 297, M = 16;
 const CW = PAGE_W - M * 2;
+/* página única e alta usada para gerar a imagem: mesmo desenho, sem quebra */
+const IMAGE_PAGE_H = 620;
 
-async function buildPdf(result) {
+/* mode: 'pdf' (A4 paginado) | 'image' (uma página só, para virar PNG) */
+async function buildReport(result, mode = 'pdf') {
   const ctor = window.jspdf && window.jspdf.jsPDF;
   if (!ctor || !result) throw new Error('jsPDF indisponível');
 
-  const doc = new ctor({ unit: 'mm', format: 'a4', compress: true });
+  const isImage = mode === 'image';
+  const H = isImage ? IMAGE_PAGE_H : PAGE_H;
+  const doc = new ctor({
+    unit: 'mm',
+    format: isImage ? [PAGE_W, IMAGE_PAGE_H] : 'a4',
+    compress: true
+  });
   let y = 0;
 
   /* ----------------------------- utilitários ----------------------------- */
@@ -95,17 +104,23 @@ async function buildPdf(result) {
     doc.lines(deltas, pts[0][0], pts[0][1]);
   };
 
-  const footer = () => {
+  const footer = atY => {
+    const fy = atY === undefined ? H - 16 : atY;
     draw(C.line);
     doc.setLineWidth(0.3);
-    doc.line(M, PAGE_H - 16, PAGE_W - M, PAGE_H - 16);
+    doc.line(M, fy, PAGE_W - M, fy);
     font('normal', 7.5);
     ink(C.muted);
-    doc.text('Gaditas Consultoria · Diagnóstico de Nível de IA', M, PAGE_H - 11);
-    doc.text(String(doc.getNumberOfPages()), PAGE_W - M, PAGE_H - 11, { align: 'right' });
+    doc.text('Gaditas Consultoria · Diagnóstico de Nível de IA', M, fy + 5);
+    const right = isImage
+      ? (location.host + location.pathname).replace(/index\.html$/i, '').replace(/\/$/, '')
+      : String(doc.getNumberOfPages());
+    doc.text(right, PAGE_W - M, fy + 5, { align: 'right' });
+    return fy + 5;
   };
 
   const ensure = h => {
+    if (isImage) return;            /* imagem: página única, nunca quebra */
     if (y + h > PAGE_H - 22) {
       footer();
       doc.addPage();
@@ -361,12 +376,62 @@ async function buildPdf(result) {
   ink(C.muted);
   doc.text('Escolha um. Um só, e faça esta semana.', M, y);
 
-  footer();
+  const bottom = footer(isImage ? y + 12 : undefined);
+  return { doc, heightMm: bottom + 7 };
+}
 
-  const slug = (result.fullName || result.name).toLowerCase()
+function reportSlug(result) {
+  return (result.fullName || result.name).toLowerCase()
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'resultado';
-  doc.save(`diagnostico-ia-${slug}.pdf`);
+}
+
+/* --------------------------------- PDF ----------------------------------- */
+async function downloadPdf(result) {
+  const { doc } = await buildReport(result, 'pdf');
+  doc.save(`diagnostico-ia-${reportSlug(result)}.pdf`);
+}
+
+/* -------------------------- PNG do mesmo relatório ------------------------ */
+let pdfjsPromise = null;
+
+function loadPdfjs() {
+  if (!pdfjsPromise) {
+    const base = document.baseURI;
+    pdfjsPromise = import(new URL('assets/vendor/pdfjs/pdf.min.mjs', base).href)
+      .then(mod => {
+        mod.GlobalWorkerOptions.workerSrc =
+          new URL('assets/vendor/pdfjs/pdf.worker.min.mjs', base).href;
+        return mod;
+      });
+  }
+  return pdfjsPromise;
+}
+
+/* Gera o relatório em página única, rasteriza com o pdf.js e corta na altura
+   do conteúdo. O desenho é exatamente o mesmo do PDF — nada é remontado. */
+async function reportImage(result, scale = 3.6) {
+  const { doc, heightMm } = await buildReport(result, 'image');
+  const bytes = doc.output('arraybuffer');
+
+  const pdfjs = await loadPdfjs();
+  const pdf = await pdfjs.getDocument({ data: new Uint8Array(bytes) }).promise;
+  const page = await pdf.getPage(1);
+  const viewport = page.getViewport({ scale });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(viewport.width);
+  canvas.height = Math.round(viewport.height * (heightMm / IMAGE_PAGE_H));
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  await page.render({ canvasContext: ctx, viewport }).promise;
+  pdf.destroy();
+
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  canvas.width = canvas.height = 0;        /* libera a memória do canvas */
+  if (!blob) throw new Error('não consegui gerar a imagem');
+  return { blob, name: `diagnostico-ia-${reportSlug(result)}.png` };
 }
 
 /* Emojis não existem nas fontes padrão do PDF — sairiam como caixinhas. */

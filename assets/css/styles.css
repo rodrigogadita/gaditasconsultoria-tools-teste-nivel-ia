@@ -234,6 +234,18 @@ h2 { font-size: clamp(23px, 3.4vw, 32px); }
 .primary-btn:active:not(:disabled) { transform: translateY(0); }
 .primary-btn:disabled { opacity: .42; cursor: not-allowed; box-shadow: none; }
 
+.whats-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 13px 24px; border: none; border-radius: 999px;
+  background: linear-gradient(135deg, #25d366 0%, #14a83f 100%); color: #fff;
+  font: 600 15px/1 var(--font-body); cursor: pointer;
+  box-shadow: 0 6px 18px rgba(20, 168, 63, .32);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.whats-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(20, 168, 63, .4); }
+.whats-btn:disabled { opacity: .5; cursor: progress; box-shadow: none; }
+.whats-btn svg { flex: none; }
+
 .ghost-btn {
   padding: 12px 20px; border-radius: 999px;
   border: 1px solid var(--border-strong); background: transparent;

@@ -387,6 +387,100 @@ function summaryText(r) {
   ].join('\n');
 }
 
+/* --------------------------- compartilhamento ---------------------------- */
+
+const WHATS_LABEL = document.querySelector('#btn-whats').innerHTML;
+
+/* Deixa o botão ocupado enquanto a tarefa roda, sem perder o rótulo original. */
+async function working(btn, busyLabel, task) {
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = busyLabel;
+  try {
+    await task();
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+}
+
+function downloadBlob(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+function shareMessage(r) {
+  const url = location.href.split(/[?#]/)[0].replace(/index\.html$/i, '');
+  return `Meu Diagnóstico de Nível de IA: ${r.profile.title} (quadrante ${r.quadrant}), ` +
+    `nota ${r.overall.toFixed(1)} de 5. Faça o seu em 5 minutos: ${url}`;
+}
+
+/* O navegador só deixa compartilhar ou abrir uma aba enquanto o clique ainda
+   "vale". Como gerar a imagem leva ~2s, cada caminho é preparado antes disso. */
+function canShareFiles() {
+  try {
+    const probe = new File(['x'], 'teste.png', { type: 'image/png' });
+    return !!(navigator.canShare && navigator.canShare({ files: [probe] }));
+  } catch (err) {
+    return false;
+  }
+}
+
+/* No celular a folha do sistema sempre tem WhatsApp. No desktop ela quase nunca
+   tem — lá vale mais abrir o WhatsApp Web com o texto e baixar a imagem. */
+function useShareSheet() {
+  const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  return canShareFiles() && touch;
+}
+
+let pendingShare = null;      /* imagem pronta esperando um novo toque */
+
+async function shareOnWhatsApp(btn) {
+  const r = state.result;
+  const text = shareMessage(r);
+  const waUrl = 'https://wa.me/?text=' + encodeURIComponent(text);
+
+  /* Desktop ou navegador sem Web Share: abre o WhatsApp agora, enquanto o
+     clique ainda vale, e baixa a imagem para anexar. */
+  if (!useShareSheet()) {
+    window.open(waUrl, '_blank', 'noopener');
+    try {
+      const { blob, name } = await reportImage(r);
+      downloadBlob(blob, name);
+      toast('Imagem baixada. É só anexar na conversa — o texto já foi junto.', 5600);
+    } catch (err) {
+      console.error(err);
+      toast('O WhatsApp abriu com o texto, mas a imagem não saiu. Tente o PDF.', 5200);
+    }
+    return;
+  }
+
+  const { blob, name } = await reportImage(r);
+  const file = new File([blob], name, { type: 'image/png' });
+  const payload = { files: [file], text, title: 'Diagnóstico de Nível de IA' };
+
+  try {
+    /* a corrida evita o botão travar caso a folha do sistema nunca responda */
+    await Promise.race([
+      navigator.share(payload),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('share-timeout')), 60000))
+    ]);
+  } catch (err) {
+    if (err && err.name === 'AbortError') return;
+    /* o gesto expirou enquanto a imagem era gerada: pede um toque novo */
+    pendingShare = payload;
+    btn.textContent = 'Pronto — toque para enviar';
+    toast('Imagem pronta. Toque de novo para escolher o WhatsApp.', 5200);
+  }
+}
+
 /* --------------------------------- eventos ------------------------------- */
 function bind() {
   $('#form-name').addEventListener('submit', e => {
@@ -431,38 +525,57 @@ function bind() {
     }
   });
 
-  $('#btn-pdf').addEventListener('click', async e => {
-    const btn = e.currentTarget;
-    btn.disabled = true;
-    btn.textContent = 'Gerando...';
+  $('#btn-pdf').addEventListener('click', e => working(e.currentTarget, 'Gerando PDF...', async () => {
     try {
-      await buildPdf(state.result);
+      await downloadPdf(state.result);
       toast('PDF gerado.');
     } catch (err) {
       console.error(err);
       toast('Não consegui gerar o PDF. Abrindo a impressão do navegador.');
       window.print();
+    }
+  }));
+
+  $('#btn-png').addEventListener('click', e => working(e.currentTarget, 'Gerando imagem...', async () => {
+    try {
+      const { blob, name } = await reportImage(state.result);
+      downloadBlob(blob, name);
+      toast('Imagem salva em alta qualidade.');
+    } catch (err) {
+      console.error(err);
+      toast('Não consegui gerar a imagem por aqui. Tente o PDF.');
+    }
+  }));
+
+  $('#btn-whats').addEventListener('click', async e => {
+    const btn = e.currentTarget;
+
+    if (pendingShare) {                 /* segundo toque: o arquivo já está pronto */
+      const payload = pendingShare;
+      pendingShare = null;
+      try {
+        await navigator.share(payload);
+      } catch (err) {
+        if (!err || err.name !== 'AbortError') {
+          downloadBlob(payload.files[0], payload.files[0].name);
+          toast('Imagem baixada. Anexe na conversa.');
+        }
+      }
+      btn.innerHTML = WHATS_LABEL;
+      return;
+    }
+
+    const label = btn.innerHTML;
+    btn.disabled = true;
+    btn.textContent = 'Preparando...';
+    try {
+      await shareOnWhatsApp(btn);
+    } catch (err) {
+      console.error(err);
+      toast('Não consegui compartilhar por aqui. Baixe o PDF e envie.');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Baixar PDF';
-    }
-  });
-
-  $('#btn-share').addEventListener('click', async () => {
-    const url = location.href.split('#')[0];
-    const data = {
-      title: 'Diagnóstico de Nível de IA',
-      text: 'Descobri o meu nível de IA em 5 minutos. Faz o seu:',
-      url
-    };
-    try {
-      if (navigator.share) await navigator.share(data);
-      else {
-        await navigator.clipboard.writeText(`${data.text} ${url}`);
-        toast('Link copiado. É só colar onde quiser.');
-      }
-    } catch (err) {
-      if (err && err.name !== 'AbortError') toast('Não consegui compartilhar por aqui.');
+      if (!pendingShare) btn.innerHTML = label;
     }
   });
 

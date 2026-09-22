@@ -11,7 +11,26 @@ posiciona o resultado num mapa de quadrantes e entrega um roadmap de evolução 
 2. Escolhe o formato: **robusto** (20 perguntas, ~5 min) ou **rápido** (10 perguntas, ~3 min).
 3. Responde numa escala de 1 a 5 — a resposta avança sozinha, sem botão.
 4. Revisa e edita qualquer resposta antes de finalizar.
-5. Recebe o perfil, os gráficos, os destaques, o roadmap e o PDF para baixar.
+5. Recebe o perfil, os gráficos, os destaques e o roadmap — para baixar em PDF, salvar
+   como imagem ou mandar direto no WhatsApp.
+
+## Relatório: PDF, PNG e WhatsApp
+
+O PDF e a imagem saem do **mesmo desenho**. O `report.js` monta o relatório em dois
+formatos: A4 paginado (PDF) ou uma página única e alta (imagem). Para a imagem, o PDF é
+gerado em memória, rasterizado pelo pdf.js a 3,6× (cerca de 2.140 px de largura, ~290 dpi)
+e cortado na altura exata do conteúdo. Nada é remontado em HTML, então não existe
+diferença de layout entre o que se baixa e o que se compartilha.
+
+O botão do WhatsApp segue o aparelho:
+
+| Onde | O que acontece |
+|---|---|
+| Celular (Web Share com arquivo) | abre a folha de compartilhamento com a imagem anexada e o texto pronto — é só escolher o WhatsApp |
+| Desktop / navegador sem Web Share | abre o WhatsApp Web com o texto e baixa a imagem para anexar |
+
+O pdf.js (1,8 MB) só é baixado quando alguém pede imagem ou compartilhamento — a página
+inicial não carrega nada disso.
 
 ## Banco de perguntas
 
@@ -52,13 +71,14 @@ assets/css/styles.css          tokens, tema claro/escuro, layout
 assets/js/data.js              40 perguntas, dimensões, perfis, mensagens
 assets/js/charts.js            mapa de quadrantes e radar em SVG puro
 assets/js/logo.js              rasteriza a logo para o PDF, na cor pedida
-assets/js/report.js            relatório em PDF (vetorial, texto selecionável)
+assets/js/report.js            relatório em PDF e em PNG (o mesmo desenho)
 assets/js/app.js               máquina de telas, atalhos, pontuação
 assets/img/gaditas-logo.svg    logo completa vetorizada (fill: currentColor)
 assets/img/gaditas-emblem.svg  só o emblema (mesmo traçado, outro viewBox)
 assets/img/favicon.svg         emblema branco sobre o azul da marca
 assets/img/og.png              imagem de compartilhamento (1200x630)
 assets/vendor/jspdf.umd.min.js jsPDF 2.5.2 (MIT), servido localmente
+assets/vendor/pdfjs/           pdf.js 4.10.38 (Apache 2.0), carregado sob demanda
 tools/og-template.html         página usada para regerar a og.png
 ```
 
